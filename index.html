@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dashboard de Performance Comercial do Sales Elevator. Analise seu funil de vendas, projete receitas e otimize sua equipe com análise em tempo real." />
+  <meta name="theme-color" content="#F96500" />
+  <meta property="og:title" content="Sales Elevator — Dashboard de Performance" />
+  <meta property="og:description" content="Analise seu funil de vendas, projete receitas e otimize sua equipe comercial com insights automáticos." />
+  <meta property="og:type" content="website" />
+  <title>Sales Elevator — Dashboard de Performance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23F96500'/><path d='M8 22 L16 10 L24 22' stroke='white' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     NAVBAR
+══════════════════════════════════ -->
+<nav class="navbar">
+  <a class="nb-brand" href="#">
+    <svg class="nb-logo" viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg">
+      <rect width="34" height="34" rx="9" fill="#F96500"/>
+      <path d="M8 24 L17 11 L26 24" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="17" cy="9" r="2" fill="white"/>
+    </svg>
+    <div class="nb-text">
+      <span class="nb-name">Sales Elevator</span>
+      <span class="nb-sub">Performance Dashboard</span>
+    </div>
+  </a>
+
+  <div class="nb-tabs">
+    <button class="nb-tab active" data-tab="funil">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M1 2h10L7 7v4l-2-1V7L1 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg>
+      Funil
+    </button>
+    <button class="nb-tab" data-tab="projecao">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:5px"><polyline points="1,9 4,5 7,7 11,2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      Projeção
+    </button>
+    <button class="nb-tab" data-tab="equipe">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:5px"><circle cx="4.5" cy="4" r="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M1 10c0-2 1.5-3 3.5-3s3.5 1 3.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" fill="none"/><circle cx="9" cy="3.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M11 9c0-1.5-1-2.2-2-2.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
+      Equipe
+    </button>
+    <button class="nb-tab" data-tab="formulas">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M2 10 L5 2 L8 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="4" y1="6" x2="8" y2="6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M8 8 L10 10 M10 8 L8 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Fórmulas
+    </button>
+  </div>
+
+  <button class="nb-cta" id="btn-exportar">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 2v7M4 7l2.5 2.5L9 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 11h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span>Exportar PDF</span>
+  </button>
+</nav>
+
+<!-- Mobile tabs -->
+<div class="mobile-tabs">
+  <button class="nb-tab active" data-tab="funil">Funil</button>
+  <button class="nb-tab" data-tab="projecao">Projeção</button>
+  <button class="nb-tab" data-tab="equipe">Equipe</button>
+  <button class="nb-tab" data-tab="formulas">Fórmulas</button>
+</div>
+
+<!-- ══════════════════════════════════
+     HERO
+══════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-badge">
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M5 0 L5.8 3.8 L9 5 L5.8 6.2 L5 10 L4.2 6.2 L1 5 L4.2 3.8Z"/></svg>
+    Análise em Tempo Real
+  </div>
+  <h1>Dashboard de <em>Performance Comercial</em></h1>
+  <p>Configure suas métricas e obtenha análise instantânea do seu funil de vendas</p>
+
+  <div class="kpi-bar">
+    <div class="kpi-item">
+      <div class="kpi-lbl">Receita / Mês</div>
+      <div class="kpi-val o" id="kpi-receita">R$ 0</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-lbl">Vendas Fechadas</div>
+      <div class="kpi-val g" id="kpi-fechados">0</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-lbl">Taxa de Conv.</div>
+      <div class="kpi-val b" id="kpi-conv">0%</div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-lbl">Ticket Médio</div>
+      <div class="kpi-val p" id="kpi-ticket">R$ 0</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     BODY
+══════════════════════════════════ -->
+<main class="app-body">
+
+  <!-- ══ TAB: FUNIL ══ -->
+  <div class="tab-panel active" id="tab-funil">
+    <div class="grid g-sidebar">
+
+      <!-- Coluna esquerda: inputs -->
+      <div>
+        <div class="card mb24">
+          <div class="card-title">
+            <div class="card-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1.5 2.5h10L8 8v4l-3-1.5V8L1.5 2.5z" stroke="#F96500" stroke-width="1.4" stroke-linejoin="round" fill="none"/></svg>
+            </div>
+            Parâmetros do Funil
+          </div>
+
+          <div class="sec-lbl">Topo do Funil</div>
+
+          <div class="grid g2 mb16">
+            <div class="field">
+              <label class="field-lbl">
+                Leads / Mês
+                <span class="tip" data-t="Total de leads gerados mensalmente pelo marketing">?</span>
+              </label>
+              <div class="iw">
+                <input type="number" id="inp-leads" value="1000" min="1" max="1000000" />
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-lbl">
+                Ticket Médio
+                <span class="tip" data-t="Valor médio de cada contrato/venda fechada">?</span>
+              </label>
+              <div class="iw">
+                <span class="ipfx">R$</span>
+                <input type="number" id="inp-ticket" value="2500" min="1" />
+              </div>
+            </div>
+          </div>
+
+          <div class="field mb16">
+            <label class="field-lbl">
+              Taxa de Contato
+              <span class="tip" data-t="% dos leads que você consegue efetivamente contatar">?</span>
+            </label>
+            <div class="sl-wrap">
+              <input type="range" id="sl-contato" min="10" max="100" value="60" />
+              <div class="sl-val" id="sl-contato-val">60%</div>
+            </div>
+          </div>
+
+          <div class="field mb16">
+            <label class="field-lbl">
+              Taxa de Qualificação
+              <span class="tip" data-t="% dos contatos que passam pela qualificação como oportunidade real">?</span>
+            </label>
+            <div class="sl-wrap">
+              <input type="range" id="sl-qualif" min="5" max="100" value="40" />
+              <div class="sl-val" id="sl-qualif-val">40%</div>
+            </div>
+          </div>
+
+          <div class="field mb16">
+            <label class="field-lbl">
+              Taxa de Conversão
+              <span class="tip" data-t="% das propostas que viram contratos assinados">?</span>
+            </label>
+            <div class="sl-wrap">
+              <input type="range" id="sl-conv" min="1" max="100" value="25" />
+              <div class="sl-val" id="sl-conv-val">25%</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="sec-lbl">Operação</div>
+
+          <div class="grid g2 mb16">
+            <div class="field">
+              <label class="field-lbl">
+                Ciclo de Vendas
+                <span class="tip" data-t="Tempo médio em dias do primeiro contato ao fechamento">?</span>
+              </label>
+              <div class="iw">
+                <input type="number" id="inp-ciclo" value="30" min="1" max="730" />
+                <span class="isfx">dias</span>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-lbl">
+                Vendedores
+                <span class="tip" data-t="Número de vendedores na equipe ativa (máx. 20)">?</span>
+              </label>
+              <div class="iw">
+                <input type="number" id="inp-vendedores" value="5" min="1" max="20" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Modo avançado toggle -->
+          <div class="tog-row mb16">
+            <label class="tog">
+              <input type="checkbox" id="tog-avancado" />
+              <span class="tog-sl"></span>
+            </label>
+            <span class="tog-lbl">Modo Avançado (Churn, LTV, Upsell)</span>
+          </div>
+
+          <!-- Bloco avançado -->
+          <div id="bloco-avancado" class="hidden">
+            <div class="divider"></div>
+            <div class="sec-lbl">Métricas Avançadas</div>
+            <div class="grid g2 mb16">
+              <div class="field">
+                <label class="field-lbl">
+                  Churn Mensal
+                  <span class="tip" data-t="% de clientes que cancelam por mês">?</span>
+                </label>
+                <div class="iw">
+                  <input type="number" id="inp-churn" value="5" min="0" max="100" step="0.5" />
+                  <span class="isfx">%</span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-lbl">
+                  Upsell / Expansão
+                  <span class="tip" data-t="% de crescimento anual via upsell na base">?</span>
+                </label>
+                <div class="iw">
+                  <input type="number" id="inp-upsell" value="15" min="0" max="200" step="0.5" />
+                  <span class="isfx">%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="metrics-grid" style="margin-top:0">
+              <div class="mc" style="--mc-c: var(--purple)">
+                <div class="mc-icon">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v14M5 6l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="mc-lbl">LTV Estimado</div>
+                <div class="mc-val" id="adv-ltv">—</div>
+                <div class="mc-sub">por cliente</div>
+              </div>
+              <div class="mc" style="--mc-c: var(--info)">
+                <div class="mc-icon">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M7 9h4M9 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <div class="mc-lbl">MRR</div>
+                <div class="mc-val" id="adv-mrr">—</div>
+              </div>
+              <div class="mc" style="--mc-c: var(--success)">
+                <div class="mc-icon">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 9l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="mc-lbl">ARR</div>
+                <div class="mc-val" id="adv-arr">—</div>
+              </div>
+              <div class="mc" style="--mc-c: var(--warning)">
+                <div class="mc-icon">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3L3 15h12L9 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/><line x1="9" y1="8" x2="9" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="13" r="0.5" fill="currentColor"/></svg>
+                </div>
+                <div class="mc-lbl">LTV:CAC</div>
+                <div class="mc-val" id="adv-ratio">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ações -->
+          <div class="divider"></div>
+          <button id="btn-resetar" class="btn-reset-params">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6a4 4 0 1 1 .7 2.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2 9V6h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Resetar Parâmetros
+          </button>
+        </div>
+
+        <!-- Cenários -->
+        <div class="card">
+          <div class="card-title">
+            <div class="card-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="#F96500" stroke-width="1.4" fill="none"/><path d="M4.5 6.5l1.5 1.5 3-3" stroke="#F96500" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            Simulador de Cenários
+          </div>
+          <div class="scenarios">
+            <div class="sc-card" data-cenario="pessimista" style="--sc-c: var(--danger)">
+              <div class="sc-emoji">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 5v14M9 15l5 4 5-4" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="sc-name">Pessimista</div>
+              <div class="sc-desc">–30% nas taxas de conversão</div>
+            </div>
+            <div class="sc-card active" data-cenario="realista" style="--sc-c: var(--primary)">
+              <div class="sc-emoji">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="9" stroke="#F96500" stroke-width="2" fill="none"/><path d="M10 14l3 3 5-5" stroke="#F96500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="sc-name">Realista</div>
+              <div class="sc-desc">Métricas atuais como base</div>
+            </div>
+            <div class="sc-card" data-cenario="otimista" style="--sc-c: var(--success)">
+              <div class="sc-emoji">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M14 23V9M9 13l5-4 5 4" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="sc-name">Otimista</div>
+              <div class="sc-desc">+35% com melhores processos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coluna direita: resultados -->
+      <div>
+        <!-- Métricas rápidas -->
+        <div class="card mb24">
+          <div class="card-title">
+            <div class="card-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="7" width="2" height="5" rx="1" fill="#F96500"/><rect x="5.5" y="4" width="2" height="8" rx="1" fill="#F96500"/><rect x="9.5" y="1.5" width="2" height="10.5" rx="1" fill="#F96500"/></svg>
+            </div>
+            Resultados do Mês
+          </div>
+          <div class="metrics-grid">
+            <div class="mc" style="--mc-c: var(--primary)">
+              <div class="mc-icon">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 14v-3m3 3V8m3 6V6m3 8V3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <div class="mc-lbl">Receita Mensal</div>
+              <div class="mc-val" id="mc-receita">R$ 0</div>
+              <div class="mc-sub">no cenário atual</div>
+            </div>
+            <div class="mc" style="--mc-c: var(--success)">
+              <div class="mc-icon">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4 9l4 4 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="mc-lbl">Vendas Fechadas</div>
+              <div class="mc-val" id="mc-fechados">0</div>
+              <div class="mc-sub">contratos/mês</div>
+            </div>
+            <div class="mc" style="--mc-c: var(--info)">
+              <div class="mc-icon">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3 16c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+              </div>
+              <div class="mc-lbl">Qualificados</div>
+              <div class="mc-val" id="mc-qualif">0</div>
+              <div class="mc-sub">oportunidades</div>
+            </div>
+            <div class="mc" style="--mc-c: var(--purple)">
+              <div class="mc-icon">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3v12M5 7l4-4 4 4M5 12h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="mc-lbl">Ticket Médio</div>
+              <div class="mc-val" id="mc-ticket">R$ 0</div>
+              <div class="mc-sub">por negócio</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Funil visual -->
+        <div class="card mb24">
+          <div class="card-title">
+            <div class="card-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1.5 2.5h10L8 8v4l-3-1.5V8L1.5 2.5z" stroke="#F96500" stroke-width="1.4" stroke-linejoin="round" fill="none"/></svg>
+            </div>
+            Funil de Conversão
+          </div>
+          <div class="funnel">
+            <div class="fn-step">
+              <div class="fn-bar-outer">
+                <div class="fn-bar-bg">
+                  <div class="fn-bar-fill" id="fn-leads-bar" style="width:100%;background:linear-gradient(90deg,#F96500,#ff8533)">
+                    <span class="fn-bar-lbl">Leads</span>
+                  </div>
+                </div>
+              </div>
+              <div class="fn-info">
+                <div class="fv" id="fn-leads-val">1.000</div>
+                <div class="fp" id="fn-leads-pct">100% do total</div>
+              </div>
+            </div>
+            <div class="fn-arrow">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin:0 4px"><path d="M5 1v8M2 6l3 3 3-3" stroke="#5C606A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Taxa de Contato
+            </div>
+            <div class="fn-step">
+              <div class="fn-bar-outer">
+                <div class="fn-bar-bg">
+                  <div class="fn-bar-fill" id="fn-contatos-bar" style="width:60%;background:linear-gradient(90deg,#3B82F6,#60a5fa)">
+                    <span class="fn-bar-lbl">Contatos</span>
+                  </div>
+                </div>
+              </div>
+              <div class="fn-info">
+                <div class="fv" id="fn-contatos-val">600</div>
+                <div class="fp" id="fn-contatos-pct">60% do total</div>
+              </div>
+            </div>
+            <div class="fn-arrow">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin:0 4px"><path d="M5 1v8M2 6l3 3 3-3" stroke="#5C606A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Qualificação
+            </div>
+            <div class="fn-step">
+              <div class="fn-bar-outer">
+                <div class="fn-bar-bg">
+                  <div class="fn-bar-fill" id="fn-qualif-bar" style="width:24%;background:linear-gradient(90deg,#8B5CF6,#a78bfa)">
+                    <span class="fn-bar-lbl">Qualificados</span>
+                  </div>
+                </div>
+              </div>
+              <div class="fn-info">
+                <div class="fv" id="fn-qualif-val">240</div>
+                <div class="fp" id="fn-qualif-pct">24% do total</div>
+              </div>
+            </div>
+            <div class="fn-arrow">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin:0 4px"><path d="M5 1v8M2 6l3 3 3-3" stroke="#5C606A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Proposta
+            </div>
+            <div class="fn-step">
+              <div class="fn-bar-outer">
+                <div class="fn-bar-bg">
+                  <div class="fn-bar-fill" id="fn-propos-bar" style="width:19%;background:linear-gradient(90deg,#F59E0B,#fbbf24)">
+                    <span class="fn-bar-lbl">Propostas</span>
+                  </div>
+                </div>
+              </div>
+              <div class="fn-info">
+                <div class="fv" id="fn-propos-val">192</div>
+                <div class="fp" id="fn-propos-pct">19% do total</div>
+              </div>
+            </div>
+            <div class="fn-arrow">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin:0 4px"><path d="M5 1v8M2 6l3 3 3-3" stroke="#5C606A" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Fechamento
+            </div>
+            <div class="fn-step">
+              <div class="fn-bar-outer">
+                <div class="fn-bar-bg">
+                  <div class="fn-bar-fill" id="fn-fechados-bar" style="width:5%;background:linear-gradient(90deg,#22C55E,#4ade80)">
+                    <span class="fn-bar-lbl">Fechados</span>
+                  </div>
+                </div>
+              </div>
+              <div class="fn-info">
+                <div class="fv" id="fn-fechados-val">48</div>
+                <div class="fp" id="fn-fechados-pct">5% do total</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Panel -->
+        <div class="ai-panel">
+          <div class="ai-hdr">
+            <div class="ai-icon">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3C7 3 4 6 4 10c0 2.5 1.2 4.7 3 6v2l2-1c.6.2 1.3.3 2 .3s1.4-.1 2-.3l2 1v-2c1.8-1.3 3-3.5 3-6 0-4-3-7-7-7z" stroke="white" stroke-width="1.5" fill="none"/><path d="M8 10h.01M11 10h.01M14 10h.01" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div class="ai-ttl">Análise Inteligente</div>
+              <div class="ai-sub">Diagnóstico automático das suas métricas</div>
+            </div>
+            <div class="ai-status">
+              <div class="ai-dot"></div>
+              Ativo
+            </div>
+          </div>
+
+          <div id="insights-list" class="insights-list"></div>
+
+          <div class="score-block">
+            <span class="score-lbl">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M6 1l1.2 3.6H11L8.4 6.9l1 3.1L6 8.2l-3.4 1.8 1-3.1L1 4.6h3.8L6 1z" fill="#F59E0B"/></svg>
+              Score do Funil
+            </span>
+            <div class="score-track">
+              <div class="score-fill" id="score-fill" style="width:0%"></div>
+            </div>
+            <div class="score-num" id="score-num">0</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ TAB: PROJEÇÃO ══ -->
+  <div class="tab-panel" id="tab-projecao">
+    <div class="grid g-sidebar-r">
+
+      <div>
+        <div class="card mb24">
+          <div class="card-title">
+            <div class="card-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><polyline points="1.5,10 4.5,6 7.5,8 11.5,2" stroke="#F96500" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+            </div>
+            Projeção de Receita
+          </div>
+
+          <div class="chart-tabs">
+            <button class="chart-tab active" data-period="6">6 meses</button>
+            <button class="chart-tab" data-period="12">12 meses</button>
+            <button class="chart-tab" data-period="24">24 meses</button>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="mainChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Tabela de projeção -->
+        <div class="card">
+          <div class="card-title">
+            <div class="card-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="1.5" width="10" height="10" rx="2" stroke="#F96500" stroke-width="1.4" fill="none"/><line x1="1.5" y1="5" x2="11.5" y2="5" stroke="#F96500" stroke-width="1"/><line x1="5" y1="5" x2="5" y2="11.5" stroke="#F96500" stroke-width="1"/></svg>
+            </div>
+            Tabela de Metas por Período
+          </div>
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>Período</th>
+                <th>Meta Receita</th>
+                <th>Vendas Necessárias</th>
+                <th>Por Vendedor</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Trimestre 1</td>
+                <td class="o" id="proj-q1-rec">—</td>
+                <td id="proj-q1-vnd">—</td>
+                <td id="proj-q1-pvd">—</td>
+                <td><span class="badge bg">Projetado</span></td>
+              </tr>
+              <tr>
+                <td>Trimestre 2</td>
+                <td class="o" id="proj-q2-rec">—</td>
+                <td id="proj-q2-vnd">—</td>
+                <td id="proj-q2-pvd">—</td>
+                <td><span class="badge bb">Planejado</span></td>
+              </tr>
+              <tr>
+                <td>Semestre 1</td>
+                <td class="g" id="proj-s1-rec">—</td>
+                <td id="proj-s1-vnd">—</td>
+                <td id="proj-s1-pvd">—</td>
+                <td><span class="badge bp">Meta</span></td>
+              </tr>
+              <tr>
+                <td>Anual</td>
+                <td class="g" id="proj-an-rec">—</td>
+                <td id="proj-an-vnd">—</td>
+                <td id="proj-an-pvd">—</td>
+                <td><span class="badge bo">Anual</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sidebar direita -->
+      <div>
+        <div class="card mb24">
+          <div class="card-title">
+            <div class="card-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1L8 4.5h4L9 7l1.5 4-4-2.5L2.5 11 4 7 1 4.5h4z" stroke="#F96500" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>
+            </div>
+            Metas Recomendadas
+          </div>
+          <div class="field mb16">
+            <label class="field-lbl">Meta Vendas / Vendedor</label>
+            <div class="iw">
+              <input type="number" id="inp-meta" value="10" min="1" max="500" />
+              <span class="isfx">/ mês</span>
+            </div>
+          </div>
+          <div style="padding:12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border2)">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;font-weight:700">Meta Total da Equipe</div>
+            <div style="font-size:26px;font-weight:900;color:var(--primary)" id="meta-total">50 vendas</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px" id="meta-rec">= R$ 125.000/mês</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <div class="card-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="#F96500" stroke-width="1.4" fill="none"/><path d="M6.5 4v3l2 1" stroke="#F96500" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            Break-even & ROI
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg3);border-radius:var(--r)">
+              <span style="font-size:12px;color:var(--text2);font-weight:600">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M5.5 1v9M2 5.5h7" stroke="#A0A4AD" stroke-width="1.3" stroke-linecap="round"/></svg>
+                Vendas p/ Break-even
+              </span>
+              <span style="font-size:17px;font-weight:900;color:var(--primary)" id="be-vendas">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg3);border-radius:var(--r)">
+              <span style="font-size:12px;color:var(--text2);font-weight:600">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M2 8.5l7-7M6 2h3v3" stroke="#A0A4AD" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Receita em 12 meses
+              </span>
+              <span style="font-size:17px;font-weight:900;color:var(--success)" id="be-12m">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg3);border-radius:var(--r)">
+              <span style="font-size:12px;color:var(--text2);font-weight:600">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M5.5 1C3 1 1 3 1 5.5S3 10 5.5 10 10 8 10 5.5 8 1 5.5 1z" stroke="#A0A4AD" stroke-width="1.2" fill="none"/><path d="M4 5l1.5 1.5 3-3" stroke="#A0A4AD" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Potencial de Crescimento
+              </span>
+              <span style="font-size:17px;font-weight:900;color:var(--info)" id="be-grow">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ TAB: EQUIPE ══ -->
+  <div class="tab-panel" id="tab-equipe">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:22px">
+        <div class="card-title" style="margin-bottom:0">
+          <div class="card-icon">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="4.5" cy="4" r="2" stroke="#F96500" stroke-width="1.3" fill="none"/><path d="M1 11c0-2 1.5-3 3.5-3s3.5 1 3.5 3" stroke="#F96500" stroke-width="1.3" stroke-linecap="round" fill="none"/><circle cx="9.5" cy="3.5" r="1.5" stroke="#F96500" stroke-width="1.2" fill="none"/><path d="M12 11c0-1.5-1-2.2-2.5-2.2" stroke="#F96500" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
+          </div>
+          Performance da Equipe de Vendas
+        </div>
+        <button id="btn-exportar-csv" class="btn btn-secondary btn-sm">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10h8M6 2v6M3.5 6l2.5 2.5L9 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Exportar CSV
+        </button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Vendedor</th>
+              <th>Meta (vendas)</th>
+              <th>Realizado</th>
+              <th>Atingimento</th>
+              <th>Receita Gerada</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="team-tbody">
+            <tr><td colspan="6" style="text-align:center;color:var(--text3);padding:24px">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px;padding:14px;background:var(--bg3);border-radius:var(--r);display:flex;gap:24px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge bg">Meta</span>
+          <span style="font-size:12px;color:var(--text2)">≥ 100% atingido</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge bo">Perto</span>
+          <span style="font-size:12px;color:var(--text2)">80–99% atingido</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge br">Abaixo</span>
+          <span style="font-size:12px;color:var(--text2)">< 80% atingido</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB: FÓRMULAS ══ -->
+  <div class="tab-panel" id="tab-formulas">
+    <div class="grid g2">
+
+      <div>
+        <div class="card mb22">
+          <div class="card-title">
+            <div class="card-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 10L5 2L8 2" stroke="#F96500" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="4" y1="6" x2="8" y2="6" stroke="#F96500" stroke-width="1.4" stroke-linecap="round"/><path d="M8 8L10 10M10 8L8 10" stroke="#F96500" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </div>
+            Fórmulas do Funil
+          </div>
+
+          <div class="fm-group">
+            <div class="fm-title">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 2h9L8 7v4l-4-2V7L1.5 2z" stroke="#F96500" stroke-width="1.2" stroke-linejoin="round" fill="none"/></svg>
+              Funil Completo
+            </div>
+            <div class="fm-box"><span class="c">// Etapas do funil</span>
+<span class="v">Contatos</span>   = Leads × Taxa_Contato
+<span class="v">Qualificados</span> = Contatos × Taxa_Qualif
+<span class="v">Propostas</span>  = Qualificados × 0.80
+<span class="v">Fechados</span>   = Propostas × Taxa_Conversão
+
+<span class="c">// Receita</span>
+<span class="e">Receita</span>    = Fechados × Ticket_Médio</div>
+          </div>
+
+          <div class="fm-group">
+            <div class="fm-title">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="1,9 3.5,5 6,6.5 10,2" stroke="#F96500" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+              Taxa de Conversão Global
+            </div>
+            <div class="fm-box"><span class="v">Conv_Global</span> = (Fechados / Leads) × 100
+
+<span class="c">// Benchmark saudável: 3–8%</span>
+<span class="c">// Acima de 10%: processo muito eficiente</span>
+<span class="c">// Abaixo de 1%: revisar qualificação</span></div>
+          </div>
+
+          <div class="fm-group">
+            <div class="fm-title">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#F96500" stroke-width="1.2" fill="none"/><path d="M6 3.5v3l2 1" stroke="#F96500" stroke-width="1.2" stroke-linecap="round"/></svg>
+              Velocidade de Vendas
+            </div>
+            <div class="fm-box"><span class="v">Velocidade</span> = (Oportunidades × Conv × Ticket)
+            / Ciclo_em_dias
+
+<span class="c">// Receita gerada por dia no pipeline</span>
+<span class="c">// Quanto maior, mais eficiente o processo</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card mb22">
+          <div class="card-title">
+            <div class="card-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="4" width="10" height="7" rx="1.5" stroke="#F96500" stroke-width="1.3" fill="none"/><path d="M4.5 4V3a2 2 0 014 0v1" stroke="#F96500" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            Métricas SaaS / Recorrência
+          </div>
+
+          <div class="fm-group">
+            <div class="fm-title">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M2 5l4-4 4 4" stroke="#22C55E" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              LTV — Customer Lifetime Value
+            </div>
+            <div class="fm-box"><span class="v">LTV</span> = Ticket_Médio / Churn_Mensal
+
+<span class="c">// Ex: R$2.500 / 5% = R$50.000 LTV</span>
+<span class="c">// Ideal: LTV ≥ 3× CAC</span></div>
+          </div>
+
+          <div class="fm-group">
+            <div class="fm-title">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="1.5" width="9" height="9" rx="1.5" stroke="#8B5CF6" stroke-width="1.2" fill="none"/><path d="M4 6h4M6 4v4" stroke="#8B5CF6" stroke-width="1.2" stroke-linecap="round"/></svg>
+              MRR e ARR
+            </div>
+            <div class="fm-box"><span class="v">MRR</span> = Clientes_Ativos × Ticket_Médio
+<span class="v">ARR</span> = MRR × 12
+
+<span class="c">// MRR Net = MRR + Expansão - Churn</span>
+<span class="e">MRR_Net</span> = MRR × (1 + Upsell% - Churn%)</div>
+          </div>
+
+          <div class="fm-group">
+            <div class="fm-title">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 9L6 3l4 6" stroke="#F59E0B" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="3.5" y1="7" x2="8.5" y2="7" stroke="#F59E0B" stroke-width="1.2" stroke-linecap="round"/></svg>
+              CAC e Payback
+            </div>
+            <div class="fm-box"><span class="v">CAC</span>    = Custo_Total_Vendas / Novos_Clientes
+<span class="v">Payback</span> = CAC / Ticket_Médio (em meses)
+
+<span class="c">// Payback ideal: < 12 meses</span>
+<span class="e">LTV_CAC</span> = LTV / CAC  <span class="c">// ideal ≥ 3×</span></div>
+          </div>
+
+          <div class="fm-group">
+            <div class="fm-title">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1L7.2 4.6H11L8 6.9l1 3.1L6 8.2l-3 1.8 1-3.1L1 4.6h3.8L6 1z" fill="#3B82F6" opacity=".8"/></svg>
+              Score do Funil
+            </div>
+            <div class="fm-box"><span class="c">// Critérios do Score (0-100)</span>
+Taxa_Contato  ≥70% → 20pts | ≥50% → 12pts
+Taxa_Qualif   ≥50% → 20pts | ≥35% → 12pts
+Taxa_Conv     ≥30% → 25pts | ≥20% → 16pts
+Ticket        ≥5k  → 20pts | ≥2k  → 13pts
+Ciclo_dias    ≤14d → 15pts | ≤30d → 9pts
+
+<span class="e">Score</span> = Σ pontos (máx. 100)</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════
+     FOOTER
+══════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-l">
+    <strong>Sales Elevator</strong> — Dashboard de Performance Comercial &copy; 2025
+  </div>
+  <div class="footer-r">
+    <a href="#" onclick="document.querySelector('[data-tab=funil]').click();return false">Funil</a>
+    <a href="#" onclick="document.querySelector('[data-tab=projecao]').click();return false">Projeção</a>
+    <a href="#" onclick="document.querySelector('[data-tab=equipe]').click();return false">Equipe</a>
+    <a href="#" onclick="document.querySelector('[data-tab=formulas]').click();return false">Fórmulas</a>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
