@@ -531,6 +531,34 @@ canvas#mainChart { max-height: 270px; }
 }
 .tbl tr.team-total:hover td { background: var(--bg4); }
 
+/* ── Células editáveis da tabela de equipe ── */
+.team-cell-edit {
+  cursor: text;
+  outline: none;
+  position: relative;
+  transition: background var(--t), box-shadow var(--t);
+}
+.team-cell-edit:hover {
+  background: var(--bg4);
+}
+.team-cell-edit:focus {
+  background: var(--bg-input);
+  box-shadow: inset 0 0 0 1.5px var(--primary);
+  border-radius: 4px;
+  color: var(--text) !important;
+  z-index: 1;
+}
+.team-cell-edit::after {
+  content: '✎';
+  position: absolute; right: 6px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px; color: var(--text3);
+  opacity: 0; transition: opacity 0.15s;
+  pointer-events: none;
+}
+.team-cell-edit:hover::after { opacity: 1; }
+.team-cell-ro { cursor: default; }
+
 /* ══════════════════════════════════
    SCENARIOS
 ══════════════════════════════════ */

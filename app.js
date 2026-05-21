@@ -21,6 +21,7 @@ const STATE = {
   modoAvancado: false,
   chart: null,
   chartPeriod: 6,
+  teamData: [],   // [{ nome, metaEdit, realEdit }] — dados editáveis da equipe
 };
 
 /* ── Nomes de vendedores (até 20) ── */
@@ -64,7 +65,7 @@ function loadState() {
     const saved = JSON.parse(raw);
     const keys = ['leads','taxaContato','taxaQualif','taxaConv','ticket','ciclo',
                   'churnMensal','upsell','vendedores','metaVendedor','cenario',
-                  'modoAvancado','chartPeriod'];
+                  'modoAvancado','chartPeriod','teamData'];
     keys.forEach(k => { if (saved[k] !== undefined) STATE[k] = saved[k]; });
   } catch (e) {}
 }
@@ -82,6 +83,9 @@ const fmtPct = (n, d = 1) => `${fmt(n, d)}%`;
 const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
 const safeDivide = (a, b) => (b > 0 ? a / b : 0);
+
+const escHtml = s => String(s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /* ── Cálculos de funil ── */
 function calcFunnel() {
@@ -340,47 +344,204 @@ function updateInsights(f, score) {
   `).join('');
 }
 
-/* ── Tabela de equipe ── */
+/* ── Tabela de equipe (editável) ── */
+
+/** Garante que teamData tem o tamanho correto */
+function ensureTeamData(count) {
+  if (!Array.isArray(STATE.teamData)) STATE.teamData = [];
+  if (STATE.teamData.length !== count) {
+    const prev = STATE.teamData.slice();
+    STATE.teamData = Array.from({ length: count }, (_, i) => ({
+      nome:     prev[i]?.nome     ?? TEAM_NAMES[i],
+      metaEdit: prev[i]?.metaEdit ?? null,   // null = usa cálculo automático
+      realEdit: prev[i]?.realEdit ?? null,   // null = usa cálculo automático
+    }));
+  }
+}
+
+/** Calcula os valores de uma linha da equipe */
+function getTeamRow(i, f) {
+  const td   = STATE.teamData[i] || {};
+  const mult = TEAM_MULT[i % TEAM_MULT.length];
+  const meta = (td.metaEdit !== null && td.metaEdit !== undefined)
+    ? td.metaEdit
+    : Math.round(STATE.metaVendedor * mult);
+  const real = (td.realEdit !== null && td.realEdit !== undefined)
+    ? td.realEdit
+    : (STATE.vendedores > 0 ? Math.round(f.fechados / STATE.vendedores * mult) : 0);
+  const pct   = meta > 0 ? Math.round(real / meta * 100) : 0;
+  const rec   = real * STATE.ticket;
+  const cls   = pct >= 100 ? 'g' : pct >= 80 ? 'o' : 'r';
+  const badge = pct >= 100 ? '<span class="badge bg">Meta</span>'
+              : pct >= 80  ? '<span class="badge bo">Perto</span>'
+              :              '<span class="badge br">Abaixo</span>';
+  return { meta, real, pct, rec, cls, badge };
+}
+
 function updateTeamTable(f) {
   const tbody = document.getElementById('team-tbody');
   if (!tbody) return;
   const count = Math.min(STATE.vendedores, TEAM_NAMES.length);
-  tbody.innerHTML = '';
-  let totMeta = 0, totReal = 0, totRec = 0;
+  ensureTeamData(count);
 
-  for (let i = 0; i < count; i++) {
-    const mult  = TEAM_MULT[i % TEAM_MULT.length];
-    const meta  = Math.round(STATE.metaVendedor * mult);
-    const real  = STATE.vendedores > 0 ? Math.round(f.fechados / STATE.vendedores * mult) : 0;
-    const pct   = meta > 0 ? Math.round(real / meta * 100) : 0;
-    const rec   = real * STATE.ticket;
-    const badge = pct >= 100 ? '<span class="badge bg">Meta</span>'
-                : pct >= 80  ? '<span class="badge bo">Perto</span>'
-                :              '<span class="badge br">Abaixo</span>';
-    const cls   = pct >= 100 ? 'g' : pct >= 80 ? 'o' : 'r';
-    totMeta += meta; totReal += real; totRec += rec;
-    tbody.innerHTML += `
-      <tr>
-        <td>${TEAM_NAMES[i]}</td>
-        <td>${fmt(meta)}</td>
-        <td class="${cls}">${fmt(real)}</td>
-        <td class="${cls}">${pct}%</td>
-        <td>${fmtBRL(rec)}</td>
-        <td>${badge}</td>
-      </tr>`;
+  const existingRows = tbody.querySelectorAll('tr[data-team-row]');
+
+  if (existingRows.length !== count) {
+    /* ── Rebuild completo ── */
+    tbody.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const r  = getTeamRow(i, f);
+      const td = STATE.teamData[i];
+      const tr = document.createElement('tr');
+      tr.dataset.teamRow = i;
+      tr.innerHTML = `
+        <td class="team-cell-edit" data-idx="${i}" data-field="nome"
+            contenteditable="true" spellcheck="false">${escHtml(td.nome)}</td>
+        <td class="team-cell-edit" data-idx="${i}" data-field="metaEdit"
+            contenteditable="true" spellcheck="false">${r.meta}</td>
+        <td class="team-cell-edit ${r.cls}" data-idx="${i}" data-field="realEdit"
+            contenteditable="true" spellcheck="false">${r.real}</td>
+        <td class="${r.cls} team-cell-ro">${r.pct}%</td>
+        <td class="team-cell-ro">${fmtBRL(r.rec)}</td>
+        <td class="team-cell-ro">${r.badge}</td>`;
+      tbody.appendChild(tr);
+    }
+    /* Total placeholder */
+    const totTr = document.createElement('tr');
+    totTr.className = 'team-total';
+    tbody.appendChild(totTr);
+    bindTeamEditing(tbody);
+  } else {
+    /* ── Atualiza apenas colunas derivadas (preserva edições ativas) ── */
+    existingRows.forEach((tr, i) => {
+      if (i >= count) return;
+      const td    = STATE.teamData[i];
+      const r     = getTeamRow(i, f);
+      const cells = tr.querySelectorAll('td');
+      if (td.metaEdit === null && document.activeElement !== cells[1])
+        cells[1].textContent = r.meta;
+      if (td.realEdit === null && document.activeElement !== cells[2]) {
+        cells[2].className = `team-cell-edit ${r.cls}`;
+        cells[2].textContent = r.real;
+      }
+      if (cells[3]) { cells[3].className = `${r.cls} team-cell-ro`; cells[3].textContent = r.pct + '%'; }
+      if (cells[4]) { cells[4].className = 'team-cell-ro'; cells[4].textContent = fmtBRL(r.rec); }
+      if (cells[5]) { cells[5].className = 'team-cell-ro'; cells[5].innerHTML = r.badge; }
+    });
   }
 
+  /* ── Linha de totais ── */
+  let totMeta = 0, totReal = 0, totRec = 0;
+  for (let i = 0; i < count; i++) {
+    const r = getTeamRow(i, f);
+    totMeta += r.meta; totReal += r.real; totRec += r.rec;
+  }
   const totPct = totMeta > 0 ? Math.round(totReal / totMeta * 100) : 0;
   const totCls = totPct >= 100 ? 'g' : totPct >= 80 ? 'o' : 'r';
-  tbody.innerHTML += `
-    <tr class="team-total">
-      <td>Total Equipe</td>
-      <td>${fmt(totMeta)}</td>
-      <td class="${totCls}">${fmt(totReal)}</td>
-      <td class="${totCls}">${totPct}%</td>
-      <td class="g">${fmtBRL(totRec)}</td>
-      <td></td>
-    </tr>`;
+  const totRow = tbody.querySelector('.team-total');
+  if (totRow) totRow.innerHTML = `
+    <td>Total Equipe</td>
+    <td>${fmt(totMeta)}</td>
+    <td class="${totCls}">${fmt(totReal)}</td>
+    <td class="${totCls}">${totPct}%</td>
+    <td class="g">${fmtBRL(totRec)}</td>
+    <td></td>`;
+}
+
+/* ── Bind de edição inline ── */
+function bindTeamEditing(tbody) {
+  tbody.querySelectorAll('.team-cell-edit').forEach(cell => {
+    /* Seleciona tudo ao focar */
+    cell.addEventListener('focus', () => {
+      const range = document.createRange();
+      range.selectNodeContents(cell);
+      const sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(range);
+    });
+    /* Bloqueia não-dígitos em campos numéricos */
+    cell.addEventListener('keypress', e => {
+      if (cell.dataset.field !== 'nome' && !/[\d]/.test(e.key)) e.preventDefault();
+    });
+    /* Enter confirma, Escape cancela */
+    cell.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); cell.blur(); }
+      if (e.key === 'Escape') { e.preventDefault(); restoreTeamCell(cell); cell.blur(); }
+    });
+    /* Salva ao sair */
+    cell.addEventListener('blur', () => saveTeamCell(cell));
+  });
+}
+
+function restoreTeamCell(cell) {
+  const i     = parseInt(cell.dataset.idx);
+  const field = cell.dataset.field;
+  const td    = STATE.teamData[i] || {};
+  const f     = calcFunnel();
+  const mult  = TEAM_MULT[i % TEAM_MULT.length];
+  if (field === 'nome') {
+    cell.textContent = td.nome || TEAM_NAMES[i];
+  } else if (field === 'metaEdit') {
+    cell.textContent = td.metaEdit !== null ? td.metaEdit : Math.round(STATE.metaVendedor * mult);
+  } else if (field === 'realEdit') {
+    cell.textContent = td.realEdit !== null ? td.realEdit
+      : (STATE.vendedores > 0 ? Math.round(f.fechados / STATE.vendedores * mult) : 0);
+  }
+}
+
+function saveTeamCell(cell) {
+  const i     = parseInt(cell.dataset.idx);
+  const field = cell.dataset.field;
+  if (!STATE.teamData[i]) return;
+  const raw   = cell.textContent.trim();
+  const mult  = TEAM_MULT[i % TEAM_MULT.length];
+  const f     = calcFunnel();
+
+  if (field === 'nome') {
+    STATE.teamData[i].nome = raw || TEAM_NAMES[i];
+    if (!raw) cell.textContent = TEAM_NAMES[i];
+  } else if (field === 'metaEdit') {
+    const num = parseInt(raw.replace(/\D/g, ''));
+    STATE.teamData[i].metaEdit = (!isNaN(num) && num > 0) ? num : null;
+    cell.textContent = STATE.teamData[i].metaEdit !== null
+      ? STATE.teamData[i].metaEdit : Math.round(STATE.metaVendedor * mult);
+  } else if (field === 'realEdit') {
+    const num = parseInt(raw.replace(/\D/g, ''));
+    STATE.teamData[i].realEdit = (!isNaN(num) && num >= 0) ? num : null;
+    cell.textContent = STATE.teamData[i].realEdit !== null ? STATE.teamData[i].realEdit
+      : (STATE.vendedores > 0 ? Math.round(f.fechados / STATE.vendedores * mult) : 0);
+  }
+
+  saveState();
+
+  /* Atualiza colunas derivadas da mesma linha */
+  const tr = cell.closest('tr');
+  if (tr) {
+    const r     = getTeamRow(i, f);
+    const cells = tr.querySelectorAll('td');
+    if (field === 'metaEdit' && cells[2]) cells[2].className = `team-cell-edit ${r.cls}`;
+    if (field === 'realEdit' && cells[2]) cells[2].className = `team-cell-edit ${r.cls}`;
+    if (cells[3]) { cells[3].className = `${r.cls} team-cell-ro`; cells[3].textContent = r.pct + '%'; }
+    if (cells[4]) { cells[4].className = 'team-cell-ro'; cells[4].textContent = fmtBRL(r.rec); }
+    if (cells[5]) { cells[5].className = 'team-cell-ro'; cells[5].innerHTML = r.badge; }
+  }
+
+  /* Recalcula totais */
+  const count = Math.min(STATE.vendedores, TEAM_NAMES.length);
+  let totMeta = 0, totReal = 0, totRec = 0;
+  for (let j = 0; j < count; j++) {
+    const r = getTeamRow(j, f);
+    totMeta += r.meta; totReal += r.real; totRec += r.rec;
+  }
+  const totPct = totMeta > 0 ? Math.round(totReal / totMeta * 100) : 0;
+  const totCls = totPct >= 100 ? 'g' : totPct >= 80 ? 'o' : 'r';
+  const totRow = document.querySelector('#team-tbody .team-total');
+  if (totRow) {
+    const tc = totRow.querySelectorAll('td');
+    if (tc[1]) tc[1].textContent = fmt(totMeta);
+    if (tc[2]) { tc[2].className = totCls; tc[2].textContent = fmt(totReal); }
+    if (tc[3]) { tc[3].className = totCls; tc[3].textContent = totPct + '%'; }
+    if (tc[4]) { tc[4].className = 'g'; tc[4].textContent = fmtBRL(totRec); }
+  }
 }
 
 /* ── Métricas avançadas ── */
@@ -428,12 +589,11 @@ function exportCSV() {
   csv += 'EQUIPE DE VENDAS\n';
   csv += 'Vendedor;Meta;Realizado;Atingimento (%);Receita\n';
   const count = Math.min(STATE.vendedores, TEAM_NAMES.length);
+  ensureTeamData(count);
   for (let i = 0; i < count; i++) {
-    const mult = TEAM_MULT[i % TEAM_MULT.length];
-    const meta = Math.round(STATE.metaVendedor * mult);
-    const real = STATE.vendedores > 0 ? Math.round(f.fechados / STATE.vendedores * mult) : 0;
-    const pct  = meta > 0 ? Math.round(real / meta * 100) : 0;
-    csv += `${TEAM_NAMES[i]};${meta};${real};${pct}%;${real * STATE.ticket}\n`;
+    const r    = getTeamRow(i, f);
+    const nome = STATE.teamData[i]?.nome || TEAM_NAMES[i];
+    csv += `${nome};${r.meta};${r.real};${r.pct}%;${r.rec}\n`;
   }
 
   if (STATE.modoAvancado) {
@@ -469,6 +629,7 @@ function resetState() {
     leads: 1000, taxaContato: 60, taxaQualif: 40, taxaConv: 25,
     ticket: 2500, ciclo: 30, churnMensal: 5, upsell: 15,
     vendedores: 5, metaVendedor: 10, cenario: 'realista', modoAvancado: false,
+    teamData: [],
   });
   if (STATE.chart) { STATE.chart.destroy(); STATE.chart = null; }
   syncInputsFromState();
