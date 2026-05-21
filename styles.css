@@ -249,7 +249,7 @@ body {
 }
 .iw {
   display: flex; align-items: stretch;
-  height: 46px; /* altura fixa garante consistência com e sem prefix/suffix */
+  height: 46px;                          /* única fonte de verdade da altura */
   background: var(--bg-input); border: 1.5px solid var(--border2);
   border-radius: var(--r); overflow: hidden;
   transition: var(--t);
@@ -259,7 +259,7 @@ body {
   box-shadow: 0 0 0 3px var(--primary-glow);
 }
 .ipfx, .isfx {
-  padding: 0 13px; height: 46px;
+  padding: 0 13px;                       /* sem height: flex stretch define */
   font-size: 12.5px; font-weight: 800; color: var(--primary);
   background: rgba(249,101,0,0.07);
   display: flex; align-items: center; flex-shrink: 0;
@@ -268,7 +268,8 @@ body {
 .ipfx { border-right: 1px solid var(--border2); }
 .isfx { border-left: 1px solid var(--border2); }
 .iw input {
-  flex: 1; padding: 0 14px; height: 46px;
+  flex: 1; padding: 0 14px;             /* sem height: flex stretch define */
+  -webkit-appearance: none; appearance: none; /* reset UA stylesheet do browser */
   background: transparent; border: none; outline: none;
   color: var(--text); font-family: var(--font);
   font-size: 15px; font-weight: 600;
