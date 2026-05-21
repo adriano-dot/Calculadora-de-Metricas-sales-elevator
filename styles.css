@@ -68,15 +68,15 @@ body {
   display: flex; align-items: center; gap: 11px;
   text-decoration: none; flex-shrink: 0;
 }
-.nb-logo { width: 34px; height: 34px; }
+.nb-logo { width: 38px; height: 38px; }
 .nb-text { display: flex; flex-direction: column; line-height: 1.1; }
 .nb-name {
-  font-size: 14px; font-weight: 900;
-  color: #fff; letter-spacing: 0.06em; text-transform: uppercase;
+  font-size: 15px; font-weight: 900;
+  color: #fff; letter-spacing: 0.07em; text-transform: uppercase;
 }
 .nb-sub {
-  font-size: 8.5px; font-weight: 700;
-  color: var(--primary); letter-spacing: 0.14em; text-transform: uppercase;
+  font-size: 9px; font-weight: 300;
+  color: rgba(255,255,255,0.45); letter-spacing: 0.18em; text-transform: uppercase;
 }
 .nb-tabs {
   display: flex; gap: 4px; flex: 1; justify-content: center;

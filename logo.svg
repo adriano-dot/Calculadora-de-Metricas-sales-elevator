@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 38" fill="none">
+  <!-- Chevron inferior (sombra) -->
+  <polygon points="5,28 19,14 33,28 29,28 19,18 9,28" fill="#c25200" opacity="0.85"/>
+  <!-- Chevron superior (laranja principal) -->
+  <polygon points="5,20 19,6 33,20 29,20 19,10 9,20" fill="#F96500"/>
+</svg>
