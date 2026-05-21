@@ -353,6 +353,7 @@ function ensureTeamData(count) {
     const prev = STATE.teamData.slice();
     STATE.teamData = Array.from({ length: count }, (_, i) => ({
       nome:     prev[i]?.nome     ?? TEAM_NAMES[i],
+      funcao:   prev[i]?.funcao   ?? '',
       metaEdit: prev[i]?.metaEdit ?? null,   // null = usa cálculo automático
       realEdit: prev[i]?.realEdit ?? null,   // null = usa cálculo automático
     }));
@@ -397,6 +398,8 @@ function updateTeamTable(f) {
       tr.innerHTML = `
         <td class="team-cell-edit" data-idx="${i}" data-field="nome"
             contenteditable="true" spellcheck="false">${escHtml(td.nome)}</td>
+        <td class="team-cell-edit team-cell-funcao" data-idx="${i}" data-field="funcao"
+            contenteditable="true" spellcheck="false">${escHtml(td.funcao || '')}</td>
         <td class="team-cell-edit" data-idx="${i}" data-field="metaEdit"
             contenteditable="true" spellcheck="false">${r.meta}</td>
         <td class="team-cell-edit ${r.cls}" data-idx="${i}" data-field="realEdit"
@@ -418,15 +421,16 @@ function updateTeamTable(f) {
       const td    = STATE.teamData[i];
       const r     = getTeamRow(i, f);
       const cells = tr.querySelectorAll('td');
-      if (td.metaEdit === null && document.activeElement !== cells[1])
-        cells[1].textContent = r.meta;
-      if (td.realEdit === null && document.activeElement !== cells[2]) {
-        cells[2].className = `team-cell-edit ${r.cls}`;
-        cells[2].textContent = r.real;
+      // cells: [0]=nome [1]=funcao [2]=metaEdit [3]=realEdit [4]=pct [5]=rec [6]=badge
+      if (td.metaEdit === null && document.activeElement !== cells[2])
+        cells[2].textContent = r.meta;
+      if (td.realEdit === null && document.activeElement !== cells[3]) {
+        cells[3].className = `team-cell-edit ${r.cls}`;
+        cells[3].textContent = r.real;
       }
-      if (cells[3]) { cells[3].className = `${r.cls} team-cell-ro`; cells[3].textContent = r.pct + '%'; }
-      if (cells[4]) { cells[4].className = 'team-cell-ro'; cells[4].textContent = fmtBRL(r.rec); }
-      if (cells[5]) { cells[5].className = 'team-cell-ro'; cells[5].innerHTML = r.badge; }
+      if (cells[4]) { cells[4].className = `${r.cls} team-cell-ro`; cells[4].textContent = r.pct + '%'; }
+      if (cells[5]) { cells[5].className = 'team-cell-ro'; cells[5].textContent = fmtBRL(r.rec); }
+      if (cells[6]) { cells[6].className = 'team-cell-ro'; cells[6].innerHTML = r.badge; }
     });
   }
 
@@ -441,6 +445,7 @@ function updateTeamTable(f) {
   const totRow = tbody.querySelector('.team-total');
   if (totRow) totRow.innerHTML = `
     <td>Total Equipe</td>
+    <td></td>
     <td>${fmt(totMeta)}</td>
     <td class="${totCls}">${fmt(totReal)}</td>
     <td class="${totCls}">${totPct}%</td>
@@ -458,9 +463,10 @@ function bindTeamEditing(tbody) {
       const sel = window.getSelection();
       sel.removeAllRanges(); sel.addRange(range);
     });
-    /* Bloqueia não-dígitos em campos numéricos */
+    /* Bloqueia não-dígitos em campos numéricos (nome e funcao aceitam qualquer texto) */
     cell.addEventListener('keypress', e => {
-      if (cell.dataset.field !== 'nome' && !/[\d]/.test(e.key)) e.preventDefault();
+      const f = cell.dataset.field;
+      if (f !== 'nome' && f !== 'funcao' && !/[\d]/.test(e.key)) e.preventDefault();
     });
     /* Enter confirma, Escape cancela */
     cell.addEventListener('keydown', e => {
@@ -480,6 +486,8 @@ function restoreTeamCell(cell) {
   const mult  = TEAM_MULT[i % TEAM_MULT.length];
   if (field === 'nome') {
     cell.textContent = td.nome || TEAM_NAMES[i];
+  } else if (field === 'funcao') {
+    cell.textContent = td.funcao || '';
   } else if (field === 'metaEdit') {
     cell.textContent = td.metaEdit !== null ? td.metaEdit : Math.round(STATE.metaVendedor * mult);
   } else if (field === 'realEdit') {
@@ -499,6 +507,8 @@ function saveTeamCell(cell) {
   if (field === 'nome') {
     STATE.teamData[i].nome = raw || TEAM_NAMES[i];
     if (!raw) cell.textContent = TEAM_NAMES[i];
+  } else if (field === 'funcao') {
+    STATE.teamData[i].funcao = raw;
   } else if (field === 'metaEdit') {
     const num = parseInt(raw.replace(/\D/g, ''));
     STATE.teamData[i].metaEdit = (!isNaN(num) && num > 0) ? num : null;
@@ -514,18 +524,20 @@ function saveTeamCell(cell) {
   saveState();
 
   /* Atualiza colunas derivadas da mesma linha */
+  /* cells: [0]=nome [1]=funcao [2]=metaEdit [3]=realEdit [4]=pct [5]=rec [6]=badge */
   const tr = cell.closest('tr');
   if (tr) {
     const r     = getTeamRow(i, f);
     const cells = tr.querySelectorAll('td');
-    if (field === 'metaEdit' && cells[2]) cells[2].className = `team-cell-edit ${r.cls}`;
-    if (field === 'realEdit' && cells[2]) cells[2].className = `team-cell-edit ${r.cls}`;
-    if (cells[3]) { cells[3].className = `${r.cls} team-cell-ro`; cells[3].textContent = r.pct + '%'; }
-    if (cells[4]) { cells[4].className = 'team-cell-ro'; cells[4].textContent = fmtBRL(r.rec); }
-    if (cells[5]) { cells[5].className = 'team-cell-ro'; cells[5].innerHTML = r.badge; }
+    if (field === 'metaEdit' && cells[3]) cells[3].className = `team-cell-edit ${r.cls}`;
+    if (field === 'realEdit' && cells[3]) cells[3].className = `team-cell-edit ${r.cls}`;
+    if (cells[4]) { cells[4].className = `${r.cls} team-cell-ro`; cells[4].textContent = r.pct + '%'; }
+    if (cells[5]) { cells[5].className = 'team-cell-ro'; cells[5].textContent = fmtBRL(r.rec); }
+    if (cells[6]) { cells[6].className = 'team-cell-ro'; cells[6].innerHTML = r.badge; }
   }
 
   /* Recalcula totais */
+  /* totRow cells: [0]=label [1]=funcao(empty) [2]=meta [3]=real [4]=pct [5]=rec [6]=badge */
   const count = Math.min(STATE.vendedores, TEAM_NAMES.length);
   let totMeta = 0, totReal = 0, totRec = 0;
   for (let j = 0; j < count; j++) {
@@ -537,10 +549,10 @@ function saveTeamCell(cell) {
   const totRow = document.querySelector('#team-tbody .team-total');
   if (totRow) {
     const tc = totRow.querySelectorAll('td');
-    if (tc[1]) tc[1].textContent = fmt(totMeta);
-    if (tc[2]) { tc[2].className = totCls; tc[2].textContent = fmt(totReal); }
-    if (tc[3]) { tc[3].className = totCls; tc[3].textContent = totPct + '%'; }
-    if (tc[4]) { tc[4].className = 'g'; tc[4].textContent = fmtBRL(totRec); }
+    if (tc[2]) tc[2].textContent = fmt(totMeta);
+    if (tc[3]) { tc[3].className = totCls; tc[3].textContent = fmt(totReal); }
+    if (tc[4]) { tc[4].className = totCls; tc[4].textContent = totPct + '%'; }
+    if (tc[5]) { tc[5].className = 'g'; tc[5].textContent = fmtBRL(totRec); }
   }
 }
 
@@ -587,13 +599,14 @@ function exportCSV() {
   csv += '\n';
 
   csv += 'EQUIPE DE VENDAS\n';
-  csv += 'Vendedor;Meta;Realizado;Atingimento (%);Receita\n';
+  csv += 'Vendedor;Função;Meta;Realizado;Atingimento (%);Receita\n';
   const count = Math.min(STATE.vendedores, TEAM_NAMES.length);
   ensureTeamData(count);
   for (let i = 0; i < count; i++) {
-    const r    = getTeamRow(i, f);
-    const nome = STATE.teamData[i]?.nome || TEAM_NAMES[i];
-    csv += `${nome};${r.meta};${r.real};${r.pct}%;${r.rec}\n`;
+    const r      = getTeamRow(i, f);
+    const nome   = STATE.teamData[i]?.nome   || TEAM_NAMES[i];
+    const funcao = STATE.teamData[i]?.funcao || '';
+    csv += `${nome};${funcao};${r.meta};${r.real};${r.pct}%;${r.rec}\n`;
   }
 
   if (STATE.modoAvancado) {

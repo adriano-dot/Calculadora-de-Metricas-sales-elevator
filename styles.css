@@ -259,7 +259,7 @@ body {
   box-shadow: 0 0 0 3px var(--primary-glow);
 }
 .ipfx, .isfx {
-  padding: 0 13px; height: 100%;
+  padding: 0 13px; height: 46px;
   font-size: 12.5px; font-weight: 800; color: var(--primary);
   background: rgba(249,101,0,0.07);
   display: flex; align-items: center; flex-shrink: 0;
@@ -268,7 +268,7 @@ body {
 .ipfx { border-right: 1px solid var(--border2); }
 .isfx { border-left: 1px solid var(--border2); }
 .iw input {
-  flex: 1; padding: 0 14px; height: 100%;
+  flex: 1; padding: 0 14px; height: 46px;
   background: transparent; border: none; outline: none;
   color: var(--text); font-family: var(--font);
   font-size: 15px; font-weight: 600;
@@ -559,6 +559,11 @@ canvas#mainChart { max-height: 270px; }
 }
 .team-cell-edit:hover::after { opacity: 1; }
 .team-cell-ro { cursor: default; }
+.team-cell-funcao { color: var(--text2); font-size: 12.5px; }
+.team-cell-funcao:empty::before {
+  content: '—';
+  color: var(--text3); pointer-events: none;
+}
 
 /* ══════════════════════════════════
    SCENARIOS
