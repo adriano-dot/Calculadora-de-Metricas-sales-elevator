@@ -184,8 +184,8 @@ body {
 .g2 { grid-template-columns: 1fr 1fr; align-items: start; }
 .g3 { grid-template-columns: 1fr 1fr 1fr; }
 .g4 { grid-template-columns: repeat(4, 1fr); }
-.g-sidebar   { grid-template-columns: 340px 1fr; }
-.g-sidebar-r { grid-template-columns: 1fr 320px; }
+.g-sidebar   { grid-template-columns: minmax(280px, 360px) 1fr; }
+.g-sidebar-r { grid-template-columns: 1fr minmax(300px, 360px); }
 
 /* ══════════════════════════════════
    CARDS
@@ -681,7 +681,7 @@ canvas#mainChart { max-height: 270px; }
 /* ══════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════ */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .g-sidebar, .g-sidebar-r { grid-template-columns: 1fr; }
   .nb-tabs { display: none; }
   .mobile-tabs {
