@@ -42,6 +42,7 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -183,7 +184,7 @@ body {
 .g2 { grid-template-columns: 1fr 1fr; align-items: start; }
 .g3 { grid-template-columns: 1fr 1fr 1fr; }
 .g4 { grid-template-columns: repeat(4, 1fr); }
-.g-sidebar   { grid-template-columns: minmax(320px, 390px) 1fr; }
+.g-sidebar   { grid-template-columns: minmax(280px, 360px) 1fr; }
 .g-sidebar-r { grid-template-columns: 1fr minmax(300px, 360px); }
 
 /* ══════════════════════════════════
@@ -680,7 +681,7 @@ canvas#mainChart { max-height: 270px; }
 /* ══════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════ */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .g-sidebar, .g-sidebar-r { grid-template-columns: 1fr; }
   .nb-tabs { display: none; }
   .mobile-tabs {
@@ -691,6 +692,12 @@ canvas#mainChart { max-height: 270px; }
   }
   .mobile-tabs::-webkit-scrollbar { display: none; }
   .mobile-tabs .nb-tab { white-space: nowrap; }
+}
+
+@media (max-width: 900px) {
+  .app-body { padding: 24px 16px; }
+  .kpi-bar { max-width: 100%; }
+  .hero { padding: 28px 20px 20px; }
 }
 
 @media (max-width: 768px) {
